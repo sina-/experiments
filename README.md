@@ -47,3 +47,13 @@ how to git with eclipse
 			- import experiments
 		- note that in general git projects can not be in workspace since eclipse will complain a project with the same name exists
 		- the method explained above is a workaround for this problem
+	- this whole idea of git repository and eclipse project and workspace is RETARDED
+	- one would think you could just clone the repo and be done with it, but NO.
+	- after cloning importing the project could go like this
+		- create a project with eclipse called {project}
+		- cd ~/git/{repositroy}
+		- mv {project} ../workspace/
+		- refresh the project inside eclipse
+		- Team -> Share -> Git
+			- select the repository in ~/git/{repositroy}
+			- finish
