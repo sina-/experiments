@@ -7,8 +7,8 @@ Created on Oct 27, 2013
 from level.level_ import Level
 
 class Level0(Level):
-    def __init__(self, url='http://www.pythonchallenge.com/pc/def/0.html'):
-        super(Level0, self).__init__(url=url)
+    def __init__(self):
+        super(Level0, self).__init__(url='http://www.pythonchallenge.com/pc/def/0.html')
 
     def solve(self):
         self.logger.info(self.soup.p.contents)
