@@ -7,9 +7,11 @@ Created on Oct 27, 2013
 from level.level_ import Level
 
 class Level0(Level):
-    def __init__(self):
-        super(Level0).__init__(type(self))
+    def __init__(self, url='http://www.pythonchallenge.com/pc/def/0.html'):
+        super(Level0, self).__init__(url=url)
 
     def solve(self):
-        pass
-        
+        self.logger.info(self.soup.p.contents)
+        solution = 2**23 
+        self.logger.info('Inside image -> 2^23 -> %s' % solution)
+        self.logger.info('Next level url: %s' % self.url.replace('0', str(solution)))
