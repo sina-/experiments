@@ -9,6 +9,8 @@ import requests_cache
 from bs4 import BeautifulSoup
 import logging
 
+from utils.utils import setup_logger
+
 class Level(object):
     '''
     Abstract class to solve puzzles on pythonchallenge.com 
@@ -17,8 +19,7 @@ class Level(object):
         self.soup = None
         self.url = url
         
-        logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
-        self.logger = logging
+        self.logger = setup_logger()
         self.logger.info('Solving %s located at %s' % (self.__class__.__name__.lower(), url))
         
         requests_cache.install_cache('/tmp/%s' % self.__class__.__name__)
