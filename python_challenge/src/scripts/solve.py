@@ -24,7 +24,8 @@ def _solve(level):
     try:
         Level = importlib.import_module('level.level_%s' % level)
     except ImportError:
-        logger.error('Level %s is not solved yet!' % level)
+        logger.error('Level %s is not solved yet! or the package import failed :(' % level)
+        logger.debug(sys.exc_info())
         sys.exit(1)
     l = getattr(Level, 'Level%s' % level)()
     l.solve()

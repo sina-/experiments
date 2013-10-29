@@ -4,7 +4,7 @@ Created on Oct 27, 2013
 @author: sina
 '''
 
-from level.level_ import Level
+from level.level__ import Level
 from string import maketrans, translate
 
 class Level1(Level):
