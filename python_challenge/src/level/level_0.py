@@ -4,7 +4,7 @@ Created on Oct 27, 2013
 @author: sina
 '''
 
-from level.level__ import Level
+from level.level_ import Level
 
 class Level0(Level):
     def __init__(self):
@@ -14,4 +14,4 @@ class Level0(Level):
         self.logger.info(self.soup.p.get_text())
         solution = 2**23 
         self.logger.info('Inside image -> 2^23 -> %s' % solution)
-        self.logger.info('Next level url: %s' % self.url.replace('0', str(solution)))
+        self._echo_success(self.url.replace('0', str(solution)))
