@@ -8,26 +8,38 @@ class ASCIIBird(object):
         self.begin_y = 0
         self.height = 10
         self.width = 20 
-        self.stdscr = curses.initscr()
-        self.win = curses.newwin(self.height, self.width, self.begin_y, self.begin_x)
-        #Hide the blinking cursor
-        curses.curs_set(0)
         self.current_x = 0
         self.current_y = 0
+        self.turn_counter = 0
+        self.max_num_walls = 3
+        self.game_speed = 10
+
+        self.stdscr = curses.initscr()
+        self.win = curses.newwin(self.height, self.width, self.begin_y, self.begin_x)
+        """ hide the blinking cursor """
+        curses.curs_set(0)
+
+        """ keys identifies the rows and values are list of chars identifying columns """
         self.field = {}
-        #keys identifying the location of the wall on x axis
-        #values are tuples with first element identifying height, and second element specifiying top, 0, or bottom, 1
+        """ keys identifying the location of the wall on x axis
+            values are tuples with first element identifying height, and second element specifiying top, 0, or bottom, 1 """
         self.walls = {}
+
         self.player_char = 'x'
         self.field_char = '.'
         self.wall_char = '#'
-        self.turn_counter = 0
-        self.max_num_walls = 3
+
         self._init_field()
+
+        self.game_on = True
 
 
     def _bound_correction(self, position, limit):
         return position if position < limit or position < 0 else 0
+
+
+    def _check_collision(self):
+        return self.field[self.current_y][self.current_x] == self.wall_char
 
 
     def _get_input(self):
@@ -46,16 +58,16 @@ class ASCIIBird(object):
 
 
     def _update_walls(self):
-        #spawn a new wall
+        """ spawn a new wall """
         if self.turn_counter % (self.width / self.max_num_walls) == 0:
             wall_height = random.randint(2, 4)
             wall_location = random.randint(0, 1)
             self.walls[self.width] = (wall_height, wall_location)
 
-        #advance the wall by one block 
+        """ advance the wall by one block """
         self.walls = {x-1: height_tuple for x, height_tuple in self.walls.iteritems()}
 
-        #remove out-of-range walls
+        """ remove out-of-field-range walls """
         for wall in dict(self.walls).iterkeys():
             if wall >= self.width or wall < 0:
                 del self.walls[wall]
@@ -72,18 +84,25 @@ class ASCIIBird(object):
         self._init_field()
         for brick_x, height_tuple in self.walls.iteritems():
             for brick_y in xrange(height_tuple[0]):
+                """ decide the wall location, top or bottom """
                 if height_tuple[1]:
                     self.field[brick_y][brick_x] = self.wall_char
                 else:
                     self.field[self.height - brick_y - 1][brick_x] = self.wall_char
+
+        if self._check_collision():
+            self.win.erase()
+            curses.endwin()
+            self.game_on = False
+
         self.field[self.current_y][self.current_x] = self.player_char
 
 
     def _draw(self):
-        for y, row in enumerate(self.field.itervalues()):
+        for y, row in self.field.iteritems():
             for x, element in enumerate(row):
-                #the try statement is to avoid moving the cursor out-of-range when x == self.width - 1
-                #check http://ubuntuforums.org/showthread.php?t=1306504 for the issue
+                """ the try statement is to avoid moving the cursor out-of-range when x == self.width - 1
+                    check http://ubuntuforums.org/showthread.php?t=1306504 for the issue """
                 try:
                     self.win.addch(y, x, element)
                 except curses.error: 
@@ -97,11 +116,12 @@ class ASCIIBird(object):
 
 
     def play(self):
-        while True:
+        while self.game_on:
             self._get_input()
             self._update()
             self._draw()
-            time.sleep(0.1)
+            time.sleep(1 / float(self.game_speed))
+        print("Game over, you hit the wall!")
 
 
 def main():
