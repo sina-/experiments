@@ -1,5 +1,6 @@
 import curses
 import time
+import random
 
 class ASCIIBird(object):
     def __init__(self):
@@ -11,34 +12,78 @@ class ASCIIBird(object):
         self.win = curses.newwin(self.height, self.width, self.begin_y, self.begin_x)
         #Hide the blinking cursor
         curses.curs_set(0)
-        self.field = {i:['.']*self.width for i in xrange(self.height)}
         self.current_x = 0
         self.current_y = 0
+        self.field = {}
+        #keys identifying the location of the wall on x axis
+        #values are tuples with first element identifying height, and second element specifiying top, 0, or bottom, 1
+        self.walls = {}
+        self.player_char = 'x'
+        self.field_char = '.'
+        self.wall_char = '#'
+        self.turn_counter = 0
+        self.max_num_walls = 3
+        self._init_field()
+
+
+    def _bound_correction(self, position, limit):
+        return position if position < limit or position < 0 else 0
 
 
     def _get_input(self):
         pass
 
 
-    def _calc_location(self):
-        self.old_x = self.current_x
-        self.old_y = self.current_y
+    def _init_field(self):
+        self.field = {i:[self.field_char]*self.width for i in xrange(self.height)}
+
+
+    def _update(self):
+        self._update_walls()
+        self._update_location()
+        self._update_field()
+        self.turn_counter += 1
+
+
+    def _update_walls(self):
+        #spawn a new wall
+        if self.turn_counter % (self.width / self.max_num_walls) == 0:
+            wall_height = random.randint(2, 4)
+            wall_location = random.randint(0, 1)
+            self.walls[self.width] = (wall_height, wall_location)
+
+        #advance the wall by one block 
+        self.walls = {x-1: height_tuple for x, height_tuple in self.walls.iteritems()}
+
+        #remove out-of-range walls
+        for wall in dict(self.walls).iterkeys():
+            if wall >= self.width or wall < 0:
+                del self.walls[wall]
+
+
+    def _update_location(self):
         self.current_x += 1
         self.current_y += 1
-        self.current_x = self.current_x if self.current_x < self.width or self.current_x < 0 else 0
-        self.current_y = self.current_y if self.current_y < self.height or self.current_y < 0 else 0
+        self.current_x = self._bound_correction(self.current_x, self.width)
+        self.current_y = self._bound_correction(self.current_y, self.height)
 
 
     def _update_field(self):
-        self.field[self.old_y][self.old_x] = '.'
-        self.field[self.current_y][self.current_x] = 'x'
+        self._init_field()
+        for brick_x, height_tuple in self.walls.iteritems():
+            for brick_y in xrange(height_tuple[0]):
+                if height_tuple[1]:
+                    self.field[brick_y][brick_x] = self.wall_char
+                else:
+                    self.field[self.height - brick_y - 1][brick_x] = self.wall_char
+        self.field[self.current_y][self.current_x] = self.player_char
 
 
     def _draw(self):
         for y, row in enumerate(self.field.itervalues()):
             for x, element in enumerate(row):
-                #the try statement is to skip the last column since it fails advancing the cursor outside when we stil on the last column
-                #check http://ubuntuforums.org/showthread.php?t=1306504
+                #the try statement is to avoid moving the cursor out-of-range when x == self.width - 1
+                #check http://ubuntuforums.org/showthread.php?t=1306504 for the issue
                 try:
                     self.win.addch(y, x, element)
                 except curses.error: 
@@ -50,13 +95,12 @@ class ASCIIBird(object):
         for i in self.field.itervalues():
             print i
 
+
     def play(self):
         while True:
             self._get_input()
-            self._calc_location()
-            self._update_field()
+            self._update()
             self._draw()
-            #self._draw_test()
             time.sleep(0.1)
 
 
