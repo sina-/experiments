@@ -9,15 +9,17 @@ class ASCIIBird(object):
         self.height = 10
         self.width = 20 
         self.current_x = 0
-        self.current_y = 0
+        self.current_y = 5
         self.turn_counter = 0
         self.max_num_walls = 3
         self.game_speed = 10
 
         self.stdscr = curses.initscr()
+        self.stdscr.nodelay(1)
         self.win = curses.newwin(self.height, self.width, self.begin_y, self.begin_x)
         """ hide the blinking cursor """
         curses.curs_set(0)
+        curses.noecho()
 
         """ keys identifies the rows and values are list of chars identifying columns """
         self.field = {}
@@ -43,7 +45,15 @@ class ASCIIBird(object):
 
 
     def _get_input(self):
-        pass
+        user_input = self.stdscr.getch()
+        if user_input == ord('w') or user_input == ord('k'):
+            self.current_y -= 1
+        elif user_input == ord('s') or user_input == ord('j'):
+            self.current_y += 1
+        elif user_input == ord('d') or user_input == ord('l'):
+            self.current_x += 1
+        elif user_input == ord('a') or user_input == ord('h'):
+            self.current_x -= 1
 
 
     def _init_field(self):
@@ -60,7 +70,7 @@ class ASCIIBird(object):
     def _update_walls(self):
         """ spawn a new wall """
         if self.turn_counter % (self.width / self.max_num_walls) == 0:
-            wall_height = random.randint(2, 4)
+            wall_height = random.randint(2, 5)
             wall_location = random.randint(0, 1)
             self.walls[self.width] = (wall_height, wall_location)
 
@@ -74,8 +84,8 @@ class ASCIIBird(object):
 
 
     def _update_location(self):
-        self.current_x += 1
-        self.current_y += 1
+#        self.current_x += 1
+#        self.current_y += 1
         self.current_x = self._bound_correction(self.current_x, self.width)
         self.current_y = self._bound_correction(self.current_y, self.height)
 
